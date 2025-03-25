@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% load static %}
+    {% load event_tags %}
+    <meta charset="ISO-8859-1">
+    <title>Event Registration System</title>
+    <link rel="shortcut icon" type="image/png" href="{% static 'event/favicon.ico' %}"/>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-color: #f8fafc;
+            --text-color: #1e293b;
+            --border-color: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.5;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav h1 {
+            font-size: 1.875rem;
+            font-weight: 600;
+            margin: 0;
+            color: var(--text-color);
+        }
+
+        .nav a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav a:hover {
+            color: var(--primary-hover);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .event-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .event-card {
+            background: white;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            transition: transform 0.2s;
+        }
+
+        .event-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .event-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .event-content {
+            padding: 1.5rem;
+        }
+
+        .event-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0 0 1rem 0;
+            color: var(--text-color);
+        }
+
+        .event-info {
+            color: #64748b;
+            margin-bottom: 0.5rem;
+        }
+
+        .event-description {
+            margin: 1rem 0;
+            color: #64748b;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .ticket-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .price {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .tickets-left {
+            color: #64748b;
+            font-size: 0.875rem;
+        }
+
+        .sold-out {
+            color: #dc2626;
+            font-weight: 500;
+        }
+
+        .success-message {
+            background-color: #dcfce7;
+            color: #166534;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="nav">
+                <h1>Event Registration System</h1>
+                <div class="nav-links">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'my_registrations' %}">My Registrations</a>
+                        {% if user.is_staff %}
+                            <a href="{% url 'create_event' %}" class="btn">Create Event</a>
+                        {% endif %}
+                        <a href="{% url 'logout' %}">Logout</a>
+                    {% else %}
+                        <a href="{% url 'register' %}">Register</a>
+                        <a href="{% url 'login' %}" class="btn">Login</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="success-message">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="event-grid">
+            {% for event in events %}
+                <div class="event-card">
+                    {% if event.image %}
+                        <img src="{{ event.image.url }}" alt="{{ event.name }}" class="event-image">
+                    {% endif %}
+                    <div class="event-content">
+                        <h3 class="event-title">{{ event.name }}</h3>
+                        <p class="event-description">{{ event.description }}</p>
+                        <div class="event-info">
+                            <p><strong>Date:</strong> {{ event.date }}</p>
+                            <p><strong>Time:</strong> {{ event.time }}</p>
+                            <p><strong>Location:</strong> {{ event.location }}</p>
+                        </div>
+                        <div class="ticket-info">
+                            <div>
+                                <div class="price">${{ event.price }}</div>
+                                {% with available_tickets=event.max_tickets|sub:event.tickets_sold %}
+                                    {% if available_tickets > 0 %}
+                                        <div class="tickets-left">{{ available_tickets }} tickets left</div>
+                                    {% else %}
+                                        <div class="sold-out">Sold Out</div>
+                                    {% endif %}
+                                {% endwith %}
+                            </div>
+                            <a href="{% url 'event_detail' event.id %}" class="btn">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <p>No events available at the moment.</p>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html> 

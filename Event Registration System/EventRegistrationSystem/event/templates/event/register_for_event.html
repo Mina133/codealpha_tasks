@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% load static %}
+    <meta charset="ISO-8859-1">
+    <title>Register for {{ event.name }} - Event Registration System</title>
+    <link rel="shortcut icon" type="image/png" href="{% static 'event/favicon.ico' %}"/>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .nav {
+            margin-bottom: 20px;
+        }
+        .nav a {
+            margin-right: 15px;
+            text-decoration: none;
+            color: #333;
+        }
+        .event-info {
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .registration-form {
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .error-message {
+            color: red;
+            margin-top: 5px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <h1>Register for Event</h1>
+        <a href="{% url 'home' %}">Back to Events</a>
+        <a href="{% url 'event_detail' event.id %}">Back to Event Details</a>
+    </div>
+
+    <div class="event-info">
+        <h2>{{ event.name }}</h2>
+        <p><strong>Date:</strong> {{ event.date }}</p>
+        <p><strong>Time:</strong> {{ event.time }}</p>
+        <p><strong>Location:</strong> {{ event.location }}</p>
+        <p><strong>Price per ticket:</strong> ${{ event.price }}</p>
+        <p><strong>Available Tickets:</strong> {{ event.max_tickets|sub:event.tickets_sold }}</p>
+    </div>
+
+    <div class="registration-form">
+        <h3>Registration Details</h3>
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="error-message">
+                            {% for error in field.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn">Complete Registration</button>
+        </form>
+    </div>
+</body>
+</html> 

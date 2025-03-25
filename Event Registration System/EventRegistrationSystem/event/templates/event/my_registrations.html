@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="ISO-8859-1">
+    <title>My Registrations</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .nav {
+            margin-bottom: 20px;
+        }
+        .nav a {
+            margin-right: 15px;
+            text-decoration: none;
+            color: #333;
+        }
+        .registration-list {
+            display: grid;
+            gap: 20px;
+        }
+        .registration-card {
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        .registration-card h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .registration-info {
+            margin: 10px 0;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .status-confirmed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status-cancelled {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .btn {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: #dc3545;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        .btn:hover {
+            background-color: #c82333;
+        }
+        .no-registrations {
+            text-align: center;
+            padding: 40px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <h1>My Registrations</h1>
+        <a href="{% url 'home' %}">Back to Events</a>
+        <a href="{% url 'logout' %}">Logout</a>
+    </div>
+
+    {% if registrations %}
+        <div class="registration-list">
+            {% for registration in registrations %}
+                <div class="registration-card">
+                    <h3>{{ registration.event.name }}</h3>
+                    <div class="registration-info">
+                        <p><strong>Date:</strong> {{ registration.event.date }}</p>
+                        <p><strong>Time:</strong> {{ registration.event.time }}</p>
+                        <p><strong>Location:</strong> {{ registration.event.location }}</p>
+                        <p><strong>Number of Tickets:</strong> {{ registration.number_of_tickets }}</p>
+                        <p><strong>Total Price:</strong> ${{ registration.total_price }}</p>
+                        <p><strong>Registration Date:</strong> {{ registration.registration_date }}</p>
+                        <p><strong>Status:</strong> 
+                            <span class="status status-{{ registration.status }}">
+                                {{ registration.status|title }}
+                            </span>
+                        </p>
+                    </div>
+                    {% if registration.status != 'cancelled' %}
+                        <a href="{% url 'cancel_registration' registration.id %}" class="btn" 
+                           onclick="return confirm('Are you sure you want to cancel this registration?')">
+                            Cancel Registration
+                        </a>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="no-registrations">
+            <h2>No Registrations Yet</h2>
+            <p>You haven't registered for any events yet.</p>
+            <a href="{% url 'home' %}" class="btn" style="background-color: #007bff;">Browse Events</a>
+        </div>
+    {% endif %}
+</body>
+</html> 
